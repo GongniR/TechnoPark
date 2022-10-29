@@ -16,7 +16,7 @@ class Ui(QtWidgets.QMainWindow):
     #  Действие для кнопок
     def push_btn(self):
         ofd = QFileDialog()
-        path = ofd.getOpenFileName(ofd, filter= " FILTERS (*.png, *jpg, *.jpeg)")
+        path = ofd.getOpenFileName(ofd)
         self.PathFile_lineEdit.setText(path[0])
 
 app = QtWidgets.QApplication(sys.argv)
