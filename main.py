@@ -1,3 +1,4 @@
+import numpy as np
 from PyQt5 import QtWidgets, uic, QtGui
 from PyQt5.QtWidgets import QFileDialog
 from PyQt5.QtGui import QPixmap
@@ -24,9 +25,12 @@ class Ui(QtWidgets.QMainWindow):
         self.max_G = self.Max_G_horizontalSlider.value()
         self.max_R = self.Max_R_horizontalSlider.value()
 
-
+        self.color = ()
+        self.x = 0
+        self.y = 0
 #         Кнопки
         self.OpenFile_pushButton.clicked.connect(self.push_btn)
+        self.GetPixel_pushButton.clicked.connect(self.getPixel)
         # Действие при изменении слайдера
         # MIN
         self.Min_B_horizontalSlider.valueChanged.connect(self.change_sl)
@@ -74,7 +78,7 @@ class Ui(QtWidgets.QMainWindow):
         self.Max_B_horizontalSlider.setEnabled(bool)
         self.Max_R_horizontalSlider.setEnabled(bool)
     # Получение изображения
-    def view_image(self, image_path):
+    def view_image(self, image_path, check = False):
         # Считываю изображение по пути
         image = cv2.imread(image_path)
 
@@ -90,7 +94,8 @@ class Ui(QtWidgets.QMainWindow):
         size = self.Image_label.size()
         h, w = size.height(), size.width()
         image = cv2.resize(image,(w,h),cv2.INTER_CUBIC)
-
+        if check:
+            self.color = image[self.x, self.y]
         if self.Range_radioButton.isChecked():
             # Обнуление не подходящих пикселей
             if self.GRAY_radioButton.isChecked():
@@ -105,6 +110,24 @@ class Ui(QtWidgets.QMainWindow):
 
         # Отображение
         self.Image_label.setPixmap(image2pixmap)
+    # Возвращает пиксель
+    def getPixel(self):
+        self.x = int(self.X_lineEdit.text())
+        self.y = int(self.Y_lineEdit.text())
+
+        self.view_image(self.image_path[0], check=True)
+        image_color = np.ones((40,40,3))
+
+        color = [int(self.color[i]) for i in range(3)]
+
+        str_color = "B: " + str(color[0]) + " G: " + str(color[1]) +" R: " + str(color[2])
+
+        self.Color_key_label.setText(str_color)
+        cv2.rectangle(image_color, (0,0), (40,40), color, -1)
+
+        image2pixmap = QPixmap.fromImage(qimage2ndarray.array2qimage(image_color))
+        self.Color_label.setPixmap(image2pixmap)
+
 
 app = QtWidgets.QApplication(sys.argv)
 window = Ui()
